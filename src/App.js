@@ -283,7 +283,7 @@ function App() {
                       </Grid>
                     </Grid>
                     <Typography variant='body1'>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce porttitor non ipsum et feugiat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis imperdiet nisl sed metus accumsan commodo. Maecenas urna orci, placerat ut lobortis eu, facilisis nec augue. Etiam eu odio quis ex luctus imperdiet sed eget mi. Fusce volutpat vel libero nec dapibus. In hac habitasse platea dictumst.
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce porttitor non ipsum et feugiat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis imperdiet nisl sed metus accumsan commodo. Maecenas urna orci, placerat ut lobortis eu, facilisis nec augue. Etiam eu odio quis ex luctus imperdiet sed eget mi. Fusce volutpat vel libero nec dapibus. In hac habitasse platea dictumst. 
                     </Typography>
                   </Paper>
                 </Grid>
