@@ -19,6 +19,8 @@ import ForecastListItem from './Components/ForecastListItem'
 import LiveTemperature from './Components/LiveTemperature';
 import Details from './Components/Details';
 import NearbyList from './Components/NearbyList';
+import HelpIcon from '@material-ui/icons/Help';
+
 
 const useStyles = makeStyles(theme => ({
   theme: {
@@ -264,7 +266,7 @@ function App() {
                 </Grid>
 
               </Grid>
-              <Grid container direction='row'>
+              <Grid container direction='row' spacing={2}>
 
                 <Grid item sm={12} md={6}>
                   <NearbyList nearby={nearby} />
@@ -279,7 +281,7 @@ function App() {
                         </Typography>
                       </Grid>
                       <Grid item sm={1}>
-                        <LocationOnIcon/> 
+                        <HelpIcon /> 
                       </Grid>
                     </Grid>
                     <Typography variant='body1'>
