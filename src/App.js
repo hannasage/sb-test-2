@@ -20,6 +20,15 @@ import LiveTemperature from './Components/LiveTemperature';
 import Details from './Components/Details';
 import NearbyList from './Components/NearbyList';
 import HelpIcon from '@material-ui/icons/Help';
+<<<<<<< Updated upstream
+=======
+import IconButton from '@material-ui/core/IconButton';
+import MoreIcon from '@material-ui/icons/MoreVert';
+import SearchBar from './Components/SearchBar';
+import Panel from './Components/Panel';
+import Snackbar from '@material-ui/core/Snackbar';
+import SnackBarContentWrapper from './Components/SnackBarContentWrapper'
+>>>>>>> Stashed changes
 
 
 const useStyles = makeStyles(theme => ({
@@ -80,16 +89,21 @@ const ColorLinearProgress = withStyles({
 
 function App() {
 
+<<<<<<< Updated upstream
   const [addressList, updateAddressList] = useState({})
   const [selectedAddress, updateSelectedAddress] = useState({})
+=======
+  const [appName, changeAppName] = useState('WeatherHub')
+  const [city, updateCity] = useState('Sykesville, MD')
+>>>>>>> Stashed changes
   const [forecast, updateForecast] = useState({})
   const [nearby, updateNearby] = useState([])
   const [lat, updateLat] = useState(36.9956066)
   const [lng, updateLng] = useState(-91.0145714)
   const [loaded, updateLoaded] = useState(false)
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const classes = useStyles();
+  const [anchorEl, setAnchorEl] = useState(null);
 
+<<<<<<< Updated upstream
   // Runs on first render to get menu list of addresses from SalesBoomerange API
   useEffect(() => {
     axios.get('https://wgrau8p1s0.execute-api.us-east-1.amazonaws.com/production/%7Bskip%7D/%7Blimit%7D/')
@@ -99,6 +113,24 @@ function App() {
       })
       .catch(error => console.log(error))
   }, [])
+=======
+  //SnackBar Open/Close
+  const [snackOpen, setSnackOpen] = useState(false);
+  const [snackVar, setSnackVar] = useState('error')
+  const [snackMsg, setSnackMsg] = useState('default message')
+
+  const classes = useStyles();
+  const open = Boolean(anchorEl);
+  const testText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce porttitor non ipsum et feugiat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis imperdiet nisl sed metus accumsan commodo. Maecenas urna orci, placerat ut lobortis eu, facilisis nec augue. Etiam eu odio quis ex luctus imperdiet sed eget mi. Fusce volutpat vel libero nec dapibus. In hac habitasse platea dictumst."
+
+  useEffect(() => {
+    updateLoaded(false)
+    axios.get(`https://api.darksky.net/forecast/09b2001e4b878941580a9e3460cb83e4/${lat},${lng}`)
+    .then(response => {
+      updateForecast(response.data)
+    })
+  }, [lat, lng])
+>>>>>>> Stashed changes
 
   //Runs on MenuItem click to grab basic information on location from the Google Places API
   useEffect(() => {
@@ -108,6 +140,7 @@ function App() {
     if (selectedAddress.primary_line != undefined) {
       let location = selectedAddress.city + ", " + selectedAddress.state
 
+<<<<<<< Updated upstream
       axios.get('https://maps.googleapis.com/maps/api/place/textsearch/json?query=' + encodeURIComponent(location.trim()) +'&key=AIzaSyDoegpsR8Hm9Dh4ZZsTpJXO9gw3jnClO5k')
       .then(response => {
         if (response.data.status == 'OK') {
@@ -121,6 +154,27 @@ function App() {
       })
       .then(response => {
         updateForecast(response.data)
+=======
+  const searchCallback = search => {
+
+    if (!search) {
+      handleSnackOpen('error', 'Invalid search, please try again.')
+    } else {
+      axios.get(`https://public.opendatasoft.com/api/records/1.0/search/?dataset=us-zip-code-latitude-and-longitude&q=${search}`)
+      .then(response => {
+        var data = response.data
+
+        if (data.records[0] != undefined) {
+          updateCity(data.records[0].fields.city + ", " + data.records[0].fields.state)
+          updateLat(data.records[0].fields.latitude)
+          updateLng(data.records[0].fields.longitude)
+        } else {
+          handleSnackOpen('error', `Zip-code not found: ${search}`);
+        }
+      })
+    }
+  }
+>>>>>>> Stashed changes
 
         return axios.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=1500&type=restaurant&key=AIzaSyDoegpsR8Hm9Dh4ZZsTpJXO9gw3jnClO5k`)
       })
@@ -136,6 +190,17 @@ function App() {
 
   const handleClick = event => {
     setAnchorEl(event.currentTarget);
+  };
+  const handleSnackOpen = (variant, message) => {
+    setSnackVar(variant)
+    setSnackMsg(message)
+    setSnackOpen(true)
+  }
+  const handleSnackClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackOpen(false);
   };
   const handleClose = () => {
     setAnchorEl(null);
@@ -245,6 +310,7 @@ function App() {
             <Grid item sm={12} md={8}>
               <Grid container direction='column' spacing={2}>
 
+<<<<<<< Updated upstream
                 <Grid item sm={12}>
                   <Paper className={classes.paper}>
                     <Grid container direction='row'>
@@ -263,6 +329,10 @@ function App() {
                       </Grid>
                     </Grid>
                   </Paper>
+=======
+                <Grid item>
+                  <Panel data={forecast} icon='loc' variant='current-forecast-details' title={city} />
+>>>>>>> Stashed changes
                 </Grid>
 
               </Grid>
@@ -294,6 +364,22 @@ function App() {
             </Grid>
           </Grid>
         </Container>
+
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          open={snackOpen}
+          autoHideDuration={3000}
+          onClose={handleSnackClose}
+        >
+          <SnackBarContentWrapper
+            onClose={handleSnackClose}
+            variant={snackVar}
+            message={snackMsg}
+          />
+        </Snackbar>
         
       </div>
     );
