@@ -20,15 +20,12 @@ import LiveTemperature from './Components/LiveTemperature';
 import Details from './Components/Details';
 import NearbyList from './Components/NearbyList';
 import HelpIcon from '@material-ui/icons/Help';
-<<<<<<< Updated upstream
-=======
 import IconButton from '@material-ui/core/IconButton';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SearchBar from './Components/SearchBar';
 import Panel from './Components/Panel';
 import Snackbar from '@material-ui/core/Snackbar';
 import SnackBarContentWrapper from './Components/SnackBarContentWrapper'
->>>>>>> Stashed changes
 
 
 const useStyles = makeStyles(theme => ({
@@ -87,15 +84,10 @@ const ColorLinearProgress = withStyles({
   },
 })(LinearProgress);
 
-function App() {
+export default function App() {
 
-<<<<<<< Updated upstream
-  const [addressList, updateAddressList] = useState({})
-  const [selectedAddress, updateSelectedAddress] = useState({})
-=======
   const [appName, changeAppName] = useState('WeatherHub')
   const [city, updateCity] = useState('Sykesville, MD')
->>>>>>> Stashed changes
   const [forecast, updateForecast] = useState({})
   const [nearby, updateNearby] = useState([])
   const [lat, updateLat] = useState(36.9956066)
@@ -103,17 +95,6 @@ function App() {
   const [loaded, updateLoaded] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null);
 
-<<<<<<< Updated upstream
-  // Runs on first render to get menu list of addresses from SalesBoomerange API
-  useEffect(() => {
-    axios.get('https://wgrau8p1s0.execute-api.us-east-1.amazonaws.com/production/%7Bskip%7D/%7Blimit%7D/')
-      .then(response => {
-        updateAddressList(response.data)
-        updateSelectedAddress(response.data.rows[0])
-      })
-      .catch(error => console.log(error))
-  }, [])
-=======
   //SnackBar Open/Close
   const [snackOpen, setSnackOpen] = useState(false);
   const [snackVar, setSnackVar] = useState('error')
@@ -130,33 +111,14 @@ function App() {
       updateForecast(response.data)
     })
   }, [lat, lng])
->>>>>>> Stashed changes
 
-  //Runs on MenuItem click to grab basic information on location from the Google Places API
   useEffect(() => {
-    if (loaded) {
-      updateLoaded(false)
+    if (forecast.currently != undefined) {
+      updateLoaded(true)
     }
-    if (selectedAddress.primary_line != undefined) {
-      let location = selectedAddress.city + ", " + selectedAddress.state
+  }, [forecast])
 
-<<<<<<< Updated upstream
-      axios.get('https://maps.googleapis.com/maps/api/place/textsearch/json?query=' + encodeURIComponent(location.trim()) +'&key=AIzaSyDoegpsR8Hm9Dh4ZZsTpJXO9gw3jnClO5k')
-      .then(response => {
-        if (response.data.status == 'OK') {
-          var data = response.data.results[0]
-          updateLat(data.geometry.location.lat)
-          updateLng(data.geometry.location.lng)
-          return axios.get(`https://api.darksky.net/forecast/09b2001e4b878941580a9e3460cb83e4/${lat},${lng}`)
-        } else {
-          console.log('From else' + response.status)
-        }
-      })
-      .then(response => {
-        updateForecast(response.data)
-=======
   const searchCallback = search => {
-
     if (!search) {
       handleSnackOpen('error', 'Invalid search, please try again.')
     } else {
@@ -174,19 +136,6 @@ function App() {
       })
     }
   }
->>>>>>> Stashed changes
-
-        return axios.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=1500&type=restaurant&key=AIzaSyDoegpsR8Hm9Dh4ZZsTpJXO9gw3jnClO5k`)
-      })
-      .then(response => {
-        updateNearby(response.data.results)
-        console.log(response.data.results)
-        updateLoaded(true)
-      })
-      .catch(error => console.log('From Second Error' + error))
-    }
-  }, [selectedAddress])
-
 
   const handleClick = event => {
     setAnchorEl(event.currentTarget);
@@ -206,8 +155,6 @@ function App() {
     setAnchorEl(null);
   };
   const handleMenuClick = (address) => {
-    // updateSelectedAddress(address.primary_line.replace('#', '') + " " + address.city + ", " + address.state)
-    updateSelectedAddress(address)
     handleClose()
   };
 
@@ -217,26 +164,8 @@ function App() {
       <AppBar className={classes.theme} position="static">
           <Toolbar>
             <Typography className={classes.title} variant="h6">
-              SalesBoomerang
+              {appName}
             </Typography>
-            <Button className={classes.whiteText} aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
-              {
-                selectedAddress.primary_line != undefined ? selectedAddress.primary_line.replace('#', '') : 'Select Address'
-              }
-            </Button>
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              {
-                addressList.rows != undefined ? 
-                addressList.rows.map(address => <MenuItem key={address.id} onClick={() => handleMenuClick(address)}>{address.primary_line.replace('#', '')}</MenuItem>) 
-                : null
-              }
-            </Menu>
           </Toolbar>
         </AppBar>
         <ColorLinearProgress />
@@ -246,43 +175,54 @@ function App() {
     return (
       <div className={classes.root}>
   
-        <AppBar className={classes.theme} position="static">
+      <AppBar className={classes.theme} position="static">
           <Toolbar>
             <Typography className={classes.title} variant="h6">
-              SalesBoomerang
+              {appName}
             </Typography>
-            <Button className={classes.whiteText} aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
-              {
-                selectedAddress.primary_line != undefined ? selectedAddress.primary_line.replace('#', '') : 'Select Address'
-              }
-            </Button>
+            <SearchBar searchListener={searchCallback} />
+            <IconButton
+              edge="end"
+              aria-label="display more actions"
+              aria-haspopup="true"
+              onClick={handleMenuClick}
+              color="inherit"
+            >
+              <MoreIcon />
+            </IconButton>
             <Menu
-              id="simple-menu"
+              id="menu-appbar"
               anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
               keepMounted
-              open={Boolean(anchorEl)}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={open}
               onClose={handleClose}
             >
-              {
-                addressList.rows != undefined ? 
-                addressList.rows.map(address => <MenuItem key={address.id} onClick={() => handleMenuClick(address)}>{address.primary_line.replace('#', '')}</MenuItem>) 
-                : null
-              }
+              <MenuItem onClick={handleClose}>Metric</MenuItem>
+              <MenuItem onClick={handleClose}>Imperial</MenuItem>
             </Menu>
           </Toolbar>
         </AppBar>
         <Container className={classes.padded} maxWidth="lg">
           <Grid container direction='row' spacing={2}>
-            <Grid item sm={12} md={4}>
+
+            <Grid item xs={12} md={4}>
               <Grid container direction='column' spacing={2}>
   
-                <Grid item sm={12} md={12}>
+                <Grid item>
                   <Paper className={classes.paperTheme}>
                     <LiveTemperature currently={forecast.currently} />
                   </Paper>
                 </Grid>
   
-                <Grid item sm={12} md={12}>
+                <Grid item>
                   <Paper className={classes.paper}>
                     <Grid container direction='column' alignItems='flex-start'>
                       <Grid item>
@@ -307,61 +247,32 @@ function App() {
   
               </Grid>
             </Grid>
-            <Grid item sm={12} md={8}>
+            <Grid item md={8}>
+
               <Grid container direction='column' spacing={2}>
 
-<<<<<<< Updated upstream
-                <Grid item sm={12}>
-                  <Paper className={classes.paper}>
-                    <Grid container direction='row'>
-                      <Grid item sm={11}>
-                        <Typography className={classes.subtitle} style={{textAlign: 'left'}} variant='h5'>
-                          {/* {selectedAddress} */}
-                          {
-                            selectedAddress.city != undefined ? 
-                            selectedAddress.city + ", " + selectedAddress.state : null 
-                          }
-                        </Typography>
-                        <Details currently={forecast.currently} />
-                      </Grid>
-                      <Grid item sm={1}>
-                        <LocationOnIcon/> 
-                      </Grid>
-                    </Grid>
-                  </Paper>
-=======
                 <Grid item>
                   <Panel data={forecast} icon='loc' variant='current-forecast-details' title={city} />
->>>>>>> Stashed changes
                 </Grid>
 
-              </Grid>
-              <Grid container direction='row' spacing={2}>
+                <Grid item>
+                  <Grid container direction='row' spacing={2}>
 
-                <Grid item sm={12} md={6}>
-                  <NearbyList nearby={nearby} />
-                </Grid>
-
-                <Grid item sm={12} md={6}>
-                  <Paper className={classes.paper}>
-                    <Grid container direction='row'>
-                      <Grid item sm={11}>
-                        <Typography className={classes.subtitle} style={{textAlign: 'left'}} variant='h5'>
-                          Information 
-                        </Typography>
-                      </Grid>
-                      <Grid item sm={1}>
-                        <HelpIcon /> 
-                      </Grid>
+                    <Grid item md={6}>
+                      <Panel data={testText} icon='help' variant='text' title="Information" />
                     </Grid>
-                    <Typography variant='body1'>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce porttitor non ipsum et feugiat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis imperdiet nisl sed metus accumsan commodo. Maecenas urna orci, placerat ut lobortis eu, facilisis nec augue. Etiam eu odio quis ex luctus imperdiet sed eget mi. Fusce volutpat vel libero nec dapibus. In hac habitasse platea dictumst. 
-                    </Typography>
-                  </Paper>
+
+                    <Grid item md={6}>
+                      <Panel data={testText} icon='help' variant='text' title="Information" />
+                    </Grid>
+
+                  </Grid>
                 </Grid>
 
               </Grid>
+              
             </Grid>
+
           </Grid>
         </Container>
 
@@ -384,8 +295,4 @@ function App() {
       </div>
     );
   }
-
-  
 }
-
-export default App;
