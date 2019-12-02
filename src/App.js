@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { makeStyles, rgbToHex, withStyles } from '@material-ui/core/styles';
+import { makeStyles, rgbToHex, withStyles, fade } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -13,13 +13,15 @@ import axios from 'axios';
 import Brightness5Icon from '@material-ui/icons/Brightness5';
 import LocationOnIcon from '@material-ui/icons/LocationOn';
 import Grid from '@material-ui/core/Grid';
-import { Icon, CircularProgress, LinearProgress } from '@material-ui/core';
-import { sizing } from '@material-ui/system';
+import { LinearProgress } from '@material-ui/core';
 import ForecastListItem from './Components/ForecastListItem'
 import LiveTemperature from './Components/LiveTemperature';
 import Details from './Components/Details';
-import NearbyList from './Components/NearbyList';
 import HelpIcon from '@material-ui/icons/Help';
+import IconButton from '@material-ui/core/IconButton';
+import MoreIcon from '@material-ui/icons/MoreVert';
+import SearchBar from './Components/SearchBar';
+import Panel from './Components/Panel';
 
 
 const useStyles = makeStyles(theme => ({
@@ -36,15 +38,15 @@ const useStyles = makeStyles(theme => ({
   },
   root: {
     flexGrow: 1,
-    backgroundColor: '#f7f7f7',
-    height: '100vh',
-    width: '100vw'
   },
   menuButton: {
     marginRight: theme.spacing(2),
   },
   title: {
-    flexGrow: 1,
+    display: 'none',
+    [theme.breakpoints.up('sm')]: {
+      display: 'block',
+    },
   },
   subtitle: {
     marginBottom: '20px',
@@ -63,10 +65,41 @@ const useStyles = makeStyles(theme => ({
     color: '#ffffff',
     backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
   },
-  loader: {
-    display: 'block',
-    margin: 'auto'
-  }
+  search: {
+    position: 'relative',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: fade(theme.palette.common.white, 0.15),
+    '&:hover': {
+      backgroundColor: fade(theme.palette.common.white, 0.25),
+    },
+    marginRight: theme.spacing(2),
+    marginLeft: 0,
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+      marginLeft: theme.spacing(3),
+      width: 'auto',
+    },
+  },
+  searchIcon: {
+    width: theme.spacing(7),
+    height: '100%',
+    position: 'absolute',
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inputRoot: {
+    color: 'inherit',
+  },
+  inputInput: {
+    padding: theme.spacing(1, 1, 1, 7),
+    transition: theme.transitions.create('width'),
+    width: '100%',
+    [theme.breakpoints.up('md')]: {
+      width: 200,
+    },
+  },
 }));
 
 const ColorLinearProgress = withStyles({
@@ -80,70 +113,44 @@ const ColorLinearProgress = withStyles({
 
 function App() {
 
+  const [appName, changeAppName] = useState('WeatherHub')
   const [addressList, updateAddressList] = useState({})
   const [selectedAddress, updateSelectedAddress] = useState({})
   const [forecast, updateForecast] = useState({})
+  const [system, changeSystem] = useState('c') // c = celcius, f = farenheit
   const [nearby, updateNearby] = useState([])
-  const [lat, updateLat] = useState(36.9956066)
-  const [lng, updateLng] = useState(-91.0145714)
+  const [lat, updateLat] = useState(39.45672)
+  const [lng, updateLng] = useState(-76.969601)
   const [loaded, updateLoaded] = useState(false)
   const [anchorEl, setAnchorEl] = React.useState(null);
   const classes = useStyles();
 
-  // Runs on first render to get menu list of addresses from SalesBoomerange API
+  const open = Boolean(anchorEl);
+
+  const testText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce porttitor non ipsum et feugiat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis imperdiet nisl sed metus accumsan commodo. Maecenas urna orci, placerat ut lobortis eu, facilisis nec augue. Etiam eu odio quis ex luctus imperdiet sed eget mi. Fusce volutpat vel libero nec dapibus. In hac habitasse platea dictumst."
+
   useEffect(() => {
-    axios.get('https://wgrau8p1s0.execute-api.us-east-1.amazonaws.com/production/%7Bskip%7D/%7Blimit%7D/')
-      .then(response => {
-        updateAddressList(response.data)
-        updateSelectedAddress(response.data.rows[0])
-      })
-      .catch(error => console.log(error))
-  }, [])
+    axios.get(`https://api.darksky.net/forecast/09b2001e4b878941580a9e3460cb83e4/${lat},${lng}`)
+    .then(response => {
+      updateForecast(response.data)
+    })
+  }, [lat, lng])
 
-  //Runs on MenuItem click to grab basic information on location from the Google Places API
   useEffect(() => {
-    if (loaded) {
-      updateLoaded(false)
+    if (forecast.currently != undefined) {
+      updateLoaded(true)
     }
-    if (selectedAddress.primary_line != undefined) {
-      let location = selectedAddress.city + ", " + selectedAddress.state
+  }, [forecast])
 
-      axios.get('https://maps.googleapis.com/maps/api/place/textsearch/json?query=' + encodeURIComponent(location.trim()) +'&key=AIzaSyDoegpsR8Hm9Dh4ZZsTpJXO9gw3jnClO5k')
-      .then(response => {
-        if (response.data.status == 'OK') {
-          var data = response.data.results[0]
-          updateLat(data.geometry.location.lat)
-          updateLng(data.geometry.location.lng)
-          return axios.get(`https://api.darksky.net/forecast/09b2001e4b878941580a9e3460cb83e4/${lat},${lng}`)
-        } else {
-          console.log('From else' + response.status)
-        }
-      })
-      .then(response => {
-        updateForecast(response.data)
+  const searchCallback = search => {
+    console.log('From Parent: ' + search)
+  }
 
-        return axios.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=1500&type=restaurant&key=AIzaSyDoegpsR8Hm9Dh4ZZsTpJXO9gw3jnClO5k`)
-      })
-      .then(response => {
-        updateNearby(response.data.results)
-        console.log(response.data.results)
-        updateLoaded(true)
-      })
-      .catch(error => console.log('From Second Error' + error))
-    }
-  }, [selectedAddress])
-
-
-  const handleClick = event => {
+  const handleMenu = event => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl(null);
-  };
-  const handleMenuClick = (address) => {
-    // updateSelectedAddress(address.primary_line.replace('#', '') + " " + address.city + ", " + address.state)
-    updateSelectedAddress(address)
-    handleClose()
   };
 
   if (!loaded) {
@@ -152,26 +159,8 @@ function App() {
       <AppBar className={classes.theme} position="static">
           <Toolbar>
             <Typography className={classes.title} variant="h6">
-              SalesBoomerang
+              {appName}
             </Typography>
-            <Button className={classes.whiteText} aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
-              {
-                selectedAddress.primary_line != undefined ? selectedAddress.primary_line.replace('#', '') : 'Select Address'
-              }
-            </Button>
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              {
-                addressList.rows != undefined ? 
-                addressList.rows.map(address => <MenuItem key={address.id} onClick={() => handleMenuClick(address)}>{address.primary_line.replace('#', '')}</MenuItem>) 
-                : null
-              }
-            </Menu>
           </Toolbar>
         </AppBar>
         <ColorLinearProgress />
@@ -184,40 +173,52 @@ function App() {
         <AppBar className={classes.theme} position="static">
           <Toolbar>
             <Typography className={classes.title} variant="h6">
-              SalesBoomerang
+              {appName}
             </Typography>
-            <Button className={classes.whiteText} aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
-              {
-                selectedAddress.primary_line != undefined ? selectedAddress.primary_line.replace('#', '') : 'Select Address'
-              }
-            </Button>
+            <SearchBar searchListener={searchCallback} />
+            <IconButton
+              edge="end"
+              aria-label="display more actions"
+              aria-haspopup="true"
+              onClick={handleMenu}
+              color="inherit"
+            >
+              <MoreIcon />
+            </IconButton>
             <Menu
-              id="simple-menu"
+              id="menu-appbar"
               anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
               keepMounted
-              open={Boolean(anchorEl)}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={open}
               onClose={handleClose}
             >
-              {
-                addressList.rows != undefined ? 
-                addressList.rows.map(address => <MenuItem key={address.id} onClick={() => handleMenuClick(address)}>{address.primary_line.replace('#', '')}</MenuItem>) 
-                : null
-              }
+              <MenuItem onClick={handleClose}>Metric</MenuItem>
+              <MenuItem onClick={handleClose}>Imperial</MenuItem>
             </Menu>
           </Toolbar>
         </AppBar>
+
         <Container className={classes.padded} maxWidth="lg">
           <Grid container direction='row' spacing={2}>
-            <Grid item sm={12} md={4}>
+
+            <Grid item xs={12} md={4}>
               <Grid container direction='column' spacing={2}>
   
-                <Grid item sm={12} md={12}>
+                <Grid item>
                   <Paper className={classes.paperTheme}>
                     <LiveTemperature currently={forecast.currently} />
                   </Paper>
                 </Grid>
   
-                <Grid item sm={12} md={12}>
+                <Grid item>
                   <Paper className={classes.paper}>
                     <Grid container direction='column' alignItems='flex-start'>
                       <Grid item>
@@ -242,56 +243,32 @@ function App() {
   
               </Grid>
             </Grid>
-            <Grid item sm={12} md={8}>
+            <Grid item md={8}>
+
               <Grid container direction='column' spacing={2}>
 
-                <Grid item sm={12}>
-                  <Paper className={classes.paper}>
-                    <Grid container direction='row'>
-                      <Grid item sm={11}>
-                        <Typography className={classes.subtitle} style={{textAlign: 'left'}} variant='h5'>
-                          {/* {selectedAddress} */}
-                          {
-                            selectedAddress.city != undefined ? 
-                            selectedAddress.city + ", " + selectedAddress.state : null 
-                          }
-                        </Typography>
-                        <Details currently={forecast.currently} />
-                      </Grid>
-                      <Grid item sm={1}>
-                        <LocationOnIcon/> 
-                      </Grid>
+                <Grid item>
+                  <Panel data={forecast} icon='loc' variant='current-forecast-details' title={`Lat: ${lat}, Lon: ${lng}`} />
+                </Grid>
+
+                <Grid item>
+                  <Grid container direction='row' spacing={2}>
+
+                    <Grid item md={6}>
+                      <Panel data={testText} icon='help' variant='text' title="Information" />
                     </Grid>
-                  </Paper>
+
+                    <Grid item md={6}>
+                      <Panel data={testText} icon='help' variant='text' title="Information" />
+                    </Grid>
+
+                  </Grid>
                 </Grid>
 
               </Grid>
-              <Grid container direction='row' spacing={2}>
-
-                <Grid item sm={12} md={6}>
-                  <NearbyList nearby={nearby} />
-                </Grid>
-
-                <Grid item sm={12} md={6}>
-                  <Paper className={classes.paper}>
-                    <Grid container direction='row'>
-                      <Grid item sm={11}>
-                        <Typography className={classes.subtitle} style={{textAlign: 'left'}} variant='h5'>
-                          Information 
-                        </Typography>
-                      </Grid>
-                      <Grid item sm={1}>
-                        <HelpIcon /> 
-                      </Grid>
-                    </Grid>
-                    <Typography variant='body1'>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce porttitor non ipsum et feugiat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis imperdiet nisl sed metus accumsan commodo. Maecenas urna orci, placerat ut lobortis eu, facilisis nec augue. Etiam eu odio quis ex luctus imperdiet sed eget mi. Fusce volutpat vel libero nec dapibus. In hac habitasse platea dictumst. 
-                    </Typography>
-                  </Paper>
-                </Grid>
-
-              </Grid>
+              
             </Grid>
+
           </Grid>
         </Container>
         
