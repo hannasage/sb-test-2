@@ -109,12 +109,18 @@ export default function App() {
     axios.get(`/forecast/09b2001e4b878941580a9e3460cb83e4/${lat},${lng}`)
     .then(response => {
       updateForecast(response.data)
+      console.log("Forecast: Got it!")
+    })
+    .catch(error => {
+      console.log("Error getting Forecast: " + error)
     })
   }, [lat, lng])
 
   useEffect(() => {
     if (forecast.currently != undefined) {
       updateLoaded(true)
+    } else {
+      console.log("Forecast is undefined.")
     }
   }, [forecast])
 
