@@ -106,7 +106,7 @@ export default function App() {
 
   useEffect(() => {
     updateLoaded(false)
-    axios.get(`https://api.darksky.net/forecast/09b2001e4b878941580a9e3460cb83e4/${lat},${lng}`)
+    axios.get(`/forecast/09b2001e4b878941580a9e3460cb83e4/${lat},${lng}`)
     .then(response => {
       updateForecast(response.data)
     })
