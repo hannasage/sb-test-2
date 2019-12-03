@@ -1,25 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { makeStyles, rgbToHex, withStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
 import Paper from '@material-ui/core/Paper'
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import axios from 'axios';
-import Brightness5Icon from '@material-ui/icons/Brightness5';
-import LocationOnIcon from '@material-ui/icons/LocationOn';
 import Grid from '@material-ui/core/Grid';
-import { Icon, CircularProgress, LinearProgress } from '@material-ui/core';
-import { sizing } from '@material-ui/system';
+import { LinearProgress } from '@material-ui/core';
 import ForecastListItem from './Components/ForecastListItem'
 import LiveTemperature from './Components/LiveTemperature';
-import Details from './Components/Details';
-import NearbyList from './Components/NearbyList';
-import HelpIcon from '@material-ui/icons/Help';
 import IconButton from '@material-ui/core/IconButton';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SearchBar from './Components/SearchBar';
@@ -89,7 +82,6 @@ export default function App() {
   const [appName, changeAppName] = useState('WeatherHub')
   const [city, updateCity] = useState('Sykesville, MD')
   const [forecast, updateForecast] = useState({})
-  const [nearby, updateNearby] = useState([])
   const [lat, updateLat] = useState(36.9956066)
   const [lng, updateLng] = useState(-91.0145714)
   const [loaded, updateLoaded] = useState(false)
